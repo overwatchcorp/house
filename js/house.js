@@ -12,7 +12,8 @@ const main = async () => {
       height = 500 - margin.top - margin.bottom;
 
   // parse the date / time
-  var parseTime = d3.timeParse("%H:%M:%S");
+  // var parseTime = d3.timeParse("%H:%M:%S");
+  var parseTime = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
 
   // set the ranges
   var x = d3.scaleTime().range([0, width]);
@@ -33,10 +34,15 @@ const main = async () => {
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
-  const data = readings.map(r => ({
+  const unsortedData = readings.map(r => ({
     close: r.data.tempC,
-    date: `${new Date(r.timestamp).getHours()}:${new Date(r.timestamp).getMinutes()}:${new Date(r.timestamp).getSeconds()}`,
+    date: new Date(r.timestamp).toISOString(),
+    timestamp: r.timestamp
   }))
+
+  // removes weird graph artifacts
+  const data = unsortedData.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+
   // format the data
   data.forEach(function(d) {
       d.date = parseTime(d.date);
